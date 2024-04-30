@@ -16,7 +16,7 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-const sessionName = "auth-session"
+const sessionId = "auth-session"
 
 var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
@@ -44,8 +44,10 @@ func InitAuth(port string) {
 func LoginHandler(c echo.Context) error {
 	verifier := oauth2.GenerateVerifier()
 
-	// todo: handle error
-	session, _ := sessionStore.Get(c.Request(), sessionName)
+	session, err := sessionStore.Get(c.Request(), sessionId)
+	if err != nil {
+		return err
+	}
 	session.Values["verifier"] = verifier
 
 	state := generateStateToken()
@@ -58,38 +60,49 @@ func LoginHandler(c echo.Context) error {
 }
 
 func AuthCallbackHandler(c echo.Context) error {
-	// todo: handle error
-	session, _ := sessionStore.Get(c.Request(), sessionName)
+	session, err := sessionStore.Get(c.Request(), sessionId)
+	if err != nil {
+		return err
+	}
 
 	state := c.FormValue("state")
 	if state != session.Values["state"] {
 		log.Fatal("state mismatch")
 	}
 
-	verifier := session.Values["verifier"].(string)
 	// exchange code for token
 	code := c.FormValue("code")
-	token, err := authConfig.Exchange(context.Background(), code, oauth2.VerifierOption(verifier))
+	verifier := session.Values["verifier"].(string)
+	token, err := authConfig.Exchange(context.TODO(), code, oauth2.VerifierOption(verifier))
 	if err != nil {
-		log.Fatal("error when exchanging auth code")
+		return err
 	}
 
-	// todo: handle error
-	// get user data
-	req, _ := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v3/userinfo", nil)
+	client := authConfig.Client(context.TODO(), token)
+
+	// create a request to retrieve user data
+	req, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v3/userinfo", nil)
+	if err != nil {
+		return err
+	}
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal("error when retrieving  user info")
+		return err
 	}
 	defer res.Body.Close()
 
-	// todo: handle error
-	userInfoJSON, _ := io.ReadAll(res.Body)
+	userInfoJSON, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
 
 	var userInfo map[string]any
-	json.Unmarshal(userInfoJSON, &userInfo)
+	err = json.Unmarshal(userInfoJSON, &userInfo)
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(http.StatusOK, userInfo)
 }
