@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
 const sessionId = "auth-session"
@@ -28,10 +27,13 @@ func InitAuth(port string) {
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		RedirectURL:  "http://localhost:" + port + "/auth/callback",
 		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
+			"read:user",
+			"user:email",
 		},
-		Endpoint: google.Endpoint,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+		},
 	}
 
 	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -42,73 +44,93 @@ func InitAuth(port string) {
 }
 
 func LoginHandler(c echo.Context) error {
-	verifier := oauth2.GenerateVerifier()
-
 	session, err := sessionStore.Get(c.Request(), sessionId)
 	if err != nil {
+		log.Printf("error when getting session: %v\n", err)
 		return err
 	}
-	session.Values["verifier"] = verifier
 
 	state := generateStateToken()
 	session.Values["state"] = state
 
 	session.Save(c.Request(), c.Response().Writer)
 
-	url := authConfig.AuthCodeURL(state, oauth2.S256ChallengeOption(verifier))
+	// github doesn't support PKCE yet.
+	url := authConfig.AuthCodeURL(state)
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func AuthCallbackHandler(c echo.Context) error {
 	session, err := sessionStore.Get(c.Request(), sessionId)
 	if err != nil {
+		log.Printf("error when getting session: %v\n", err)
 		return err
 	}
 
 	state := c.FormValue("state")
 	if state != session.Values["state"] {
-		log.Fatal("state mismatch")
+		log.Printf("state token mismatch: %v\n", err)
+		return err
 	}
 
 	// exchange code for token
 	code := c.FormValue("code")
-	verifier := session.Values["verifier"].(string)
-	token, err := authConfig.Exchange(context.TODO(), code, oauth2.VerifierOption(verifier))
+	token, err := authConfig.Exchange(context.TODO(), code)
 	if err != nil {
+		log.Printf("error when exchanging code for token: %v\n", err)
 		return err
 	}
 
 	client := authConfig.Client(context.TODO(), token)
 
 	// create a request to retrieve user data
-	req, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v3/userinfo", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
+		log.Printf("error when creating request to retrieve user data: %v\n", err)
 		return err
 	}
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 
 	res, err := client.Do(req)
 	if err != nil {
+		log.Printf("error when retrieving user data from github: %v\n", err)
 		return err
 	}
 	defer res.Body.Close()
 
-	userInfoJSON, err := io.ReadAll(res.Body)
+	rawData, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Printf("error when reading response data: %v\n", err)
 		return err
 	}
 
-	var userInfo map[string]any
-	err = json.Unmarshal(userInfoJSON, &userInfo)
+	var userData map[string]any
+	err = json.Unmarshal(rawData, &userData)
 	if err != nil {
+		log.Printf("error while unmarshalling json: %v\n", err)
 		return err
 	}
 
-	return c.JSON(http.StatusOK, userInfo)
+	// github user id should always be int
+	userGithubId := userData["id"].(float64)
+	user := User{
+		GitHubId:  int(userGithubId),
+		Username:  userData["login"].(string),
+		AvatarUrl: userData["avatar_url"].(string),
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
 
 func generateStateToken() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
+}
+
+type User struct {
+	Id        string `json:"id"`
+	GitHubId  int    `json:"github_id"`
+	Username  string `json:"username"`
+	AvatarUrl string `json:"avatar_url"`
 }

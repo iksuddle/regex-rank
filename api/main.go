@@ -32,6 +32,6 @@ func main() {
 }
 
 func indexHandler(c echo.Context) error {
-	indexHTML := `<h2>login with <a href="/login">Google</a></h2>`
+	indexHTML := `<h2>login with <a href="/login">GitHub</a></h2>`
 	return c.HTML(http.StatusOK, indexHTML)
 }
