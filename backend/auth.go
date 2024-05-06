@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -104,19 +103,10 @@ func AuthCallbackHandler(c echo.Context) error {
 		return err
 	}
 
-	var userData map[string]any
-	err = json.Unmarshal(rawData, &userData)
+	user, err := NewUserFromJson(rawData)
 	if err != nil {
-		log.Printf("error while unmarshalling json: %v\n", err)
+		log.Printf("error when creating user from json data: %v\n", err)
 		return err
-	}
-
-	// github user id should always be int
-	userGithubId := userData["id"].(float64)
-	user := User{
-		GitHubId:  int(userGithubId),
-		Username:  userData["login"].(string),
-		AvatarUrl: userData["avatar_url"].(string),
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -126,11 +116,4 @@ func generateStateToken() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
-}
-
-type User struct {
-	Id        string `json:"id"`
-	GitHubId  int    `json:"github_id"`
-	Username  string `json:"username"`
-	AvatarUrl string `json:"avatar_url"`
 }
