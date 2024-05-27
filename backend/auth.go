@@ -20,11 +20,11 @@ var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
 
 // port needed for auth redirect url
-func InitAuth(port string) {
+func InitAuth() {
 	authConfig = &oauth2.Config{
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
-		RedirectURL:  "http://localhost:" + port + "/auth/callback",
+		RedirectURL:  "http://localhost:" + Envs.Port + "/auth/callback",
 		Scopes: []string{
 			"read:user",
 			"user:email",

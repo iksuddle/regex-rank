@@ -27,3 +27,4 @@ func NewUserFromJson(data []byte) (*User, error) {
 
 	return user, nil
 }
+
