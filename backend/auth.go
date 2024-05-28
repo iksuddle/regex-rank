@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"io"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -37,9 +37,28 @@ func InitAuth() {
 
 	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 	sessionStore.Options.Path = "/"
-	sessionStore.Options.MaxAge = 3600
+	sessionStore.Options.MaxAge = 86400
 	sessionStore.Options.HttpOnly = true
+    sessionStore.Options.SameSite = http.SameSiteLaxMode
 	sessionStore.Options.Secure = true // some browsers consider http://localhost secure
+}
+
+func LogoutHandler(c echo.Context) error {
+    session, err := sessionStore.Get(c.Request(), sessionId)
+    if err != nil {
+        return err
+    }
+
+    if session.IsNew {
+        return c.Redirect(http.StatusTemporaryRedirect, "/")
+    }
+
+    session.Options.MaxAge = -1
+    if err = session.Save(c.Request(), c.Response().Writer); err != nil {
+        return err
+    }
+
+    return c.HTML(http.StatusOK, "<h1>Logged out.</h1>")
 }
 
 func LoginHandler(c echo.Context) error {
@@ -97,17 +116,15 @@ func AuthCallbackHandler(c echo.Context) error {
 	}
 	defer res.Body.Close()
 
-	rawData, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("error when reading response data: %v\n", err)
-		return err
-	}
+    var userData map[string]any
+    if err = json.NewDecoder(res.Body).Decode(&userData); err != nil {
+        return err
+    }
 
-	user, err := NewUserFromJson(rawData)
-	if err != nil {
-		log.Printf("error when creating user from json data: %v\n", err)
-		return err
-	}
+    user, err := NewUserFromData(userData)
+    if err != nil {
+        return err
+    }
 
 	return c.JSON(http.StatusOK, user)
 }

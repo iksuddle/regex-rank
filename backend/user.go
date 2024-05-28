@@ -1,23 +1,13 @@
 package main
 
-import (
-	"encoding/json"
-)
-
 type User struct {
+	Id        int    `json:"id"`
 	GitHubId  int    `json:"github_id"`
 	Username  string `json:"username"`
 	AvatarUrl string `json:"avatar_url"`
 }
 
-func NewUserFromJson(data []byte) (*User, error) {
-	var userData map[string]any
-
-	err := json.Unmarshal(data, &userData)
-	if err != nil {
-		return nil, err
-	}
-
+func NewUserFromData(userData map[string]any) (*User, error) {
 	userGithubId := userData["id"].(float64)
 	user := &User{
 		GitHubId:  int(userGithubId),
@@ -27,4 +17,3 @@ func NewUserFromJson(data []byte) (*User, error) {
 
 	return user, nil
 }
-
