@@ -15,8 +15,8 @@ func main() {
 
 	e.GET("/", indexHandler)
 	e.GET("/login", LoginHandler)
-	e.GET("/auth/callback", AuthCallbackHandler)
-	e.GET("/logout", LogoutHandler)
+	e.GET("/login/callback", AuthCallbackHandler)
+	// e.GET("/logout", LogoutHandler)
 
 	e.Logger.Fatal(e.Start(":" + Envs.Port))
 }
