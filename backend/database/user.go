@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/iksuddle/regex-rank/types"
