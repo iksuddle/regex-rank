@@ -8,26 +8,30 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/sessions"
+	"github.com/iksuddle/regex-rank/config"
+	"github.com/iksuddle/regex-rank/database"
+	"github.com/iksuddle/regex-rank/types"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 )
 
-const stateSessionId = "state-token"
-const authSessionId = "rgx-auth"
+const stateSessionName = "state-token"
+const authSessionName = "rgx-auth"
 const userIdKey = "user-id"
 
 var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
 
-// ensure .env is loaded before calling InitAuth
-func InitAuth() {
+var userStore *database.UserStore
+
+func InitAuth(config *config.Config, db *sqlx.DB) {
 	authConfig = &oauth2.Config{
-		ClientID:     os.Getenv("CLIENT_ID"),
-		ClientSecret: os.Getenv("CLIENT_SECRET"),
-		RedirectURL:  "http://localhost:" + Envs.Port + "/login/callback",
+		ClientID:     config.ClientId,
+		ClientSecret: config.ClientSecret,
+		RedirectURL:  "http://localhost:" + config.Port + "/login/callback",
 		Scopes: []string{
 			"read:user",
 			"user:email",
@@ -38,34 +42,18 @@ func InitAuth() {
 		},
 	}
 
-	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+	sessionStore = sessions.NewCookieStore([]byte(config.SessionKey))
 	sessionStore.Options.Path = "/"
 	sessionStore.Options.MaxAge = 86400 // one day
 	sessionStore.Options.HttpOnly = true
 	sessionStore.Options.SameSite = http.SameSiteLaxMode
 	sessionStore.Options.Secure = true // some browsers consider http://localhost secure
+
+	userStore = database.NewUserStore(db)
 }
 
-// func LogoutHandler(c echo.Context) error {
-// 	session, err := sessionStore.Get(c.Request(), sessionId)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	if session.IsNew {
-// 		return c.Redirect(http.StatusTemporaryRedirect, "/")
-// 	}
-//
-// 	session.Options.MaxAge = -1
-// 	if err = session.Save(c.Request(), c.Response().Writer); err != nil {
-// 		return err
-// 	}
-//
-// 	return c.HTML(http.StatusOK, "<h1>Logged out.</h1>")
-// }
-
 func LoginHandler(c echo.Context) error {
-	stateSession, err := sessionStore.Get(c.Request(), stateSessionId)
+	stateSession, err := sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
 		log.Printf("error when getting session: %v\n", err)
 		return err
@@ -80,8 +68,8 @@ func LoginHandler(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func AuthCallbackHandler(c echo.Context) error {
-	stateSession, err := sessionStore.Get(c.Request(), stateSessionId)
+func LoginCallbackHandler(c echo.Context) error {
+	stateSession, err := sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
 		log.Printf("error when getting session: %v\n", err)
 		return err
@@ -95,7 +83,7 @@ func AuthCallbackHandler(c echo.Context) error {
 	}
 	// delete the state token
 	stateSession.Options.MaxAge = -1
-	defer stateSession.Save(c.Request(), c.Response().Writer)
+	stateSession.Save(c.Request(), c.Response().Writer)
 
 	// exchange code for token
 	code := c.FormValue("code")
@@ -125,17 +113,28 @@ func AuthCallbackHandler(c echo.Context) error {
 	// get user data from response
 	var userData map[string]any
 	if err = json.NewDecoder(res.Body).Decode(&userData); err != nil {
-		log.Println("error 1")
+		log.Println("error when decoding user data")
 		return err
 	}
 
-	user, err := NewUserFromData(userData)
+	// check if user exists
+	userGithubId := int(userData["id"].(float64))
+	user, err := userStore.GetUserById(userGithubId)
 	if err != nil {
-		log.Println("error 2")
-		return err
+		// user does not exist
+		user, err = types.NewUserFromData(userData)
+		if err != nil {
+			log.Printf("error when creating user %d\n", userGithubId)
+			return err
+		}
+		err = userStore.CreateUser(user)
+		if err != nil {
+			log.Printf("error when inserting user %d\n", user.Id)
+			return err
+		}
 	}
 
-	return c.HTML(http.StatusOK, fmt.Sprintf(loggedInView, user.Username, user.GitHubId, user.AvatarUrl))
+	return c.HTML(http.StatusOK, fmt.Sprintf(loggedInView, user.Username, user.Id, user.AvatarUrl))
 }
 
 func generateStateToken() string {
@@ -146,6 +145,6 @@ func generateStateToken() string {
 
 var loggedInView = `
 <h1>Welcome %s</h1>
-<p>Your <code>github_id</code> is <code>%d</code></p>
+<p>Your <code>id</code> is <code>%d</code></p>
 <img src="%s" width="200" height="200" style="border-radius:50%%;border:0.5rem solid #DDDDDD">
 `
