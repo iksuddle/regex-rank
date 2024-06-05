@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -22,10 +22,10 @@ const stateSessionName = "state-token"
 const authSessionName = "rgx-auth"
 const userIdKey = "user-id"
 
+var userStore *database.UserStore
+
 var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
-
-var userStore *database.UserStore
 
 func InitAuth(config *config.Config, db *sqlx.DB) {
 	authConfig = &oauth2.Config{
@@ -78,8 +78,7 @@ func LoginCallbackHandler(c echo.Context) error {
 	// verify that the states match
 	state := c.FormValue("state")
 	if state != stateSession.Values["state"] {
-		log.Printf("state token mismatch: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusForbidden, "state token mismatch")
 	}
 	// delete the state token
 	stateSession.Options.MaxAge = -1
@@ -146,5 +145,5 @@ func generateStateToken() string {
 var loggedInView = `
 <h1>Welcome %s</h1>
 <p>Your <code>id</code> is <code>%d</code></p>
-<img src="%s" width="200" height="200" style="border-radius:50%%;border:0.5rem solid #DDDDDD">
+<img src="%s" width="200" height="200" "border-radius:50%%;">
 `

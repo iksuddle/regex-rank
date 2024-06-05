@@ -40,6 +40,6 @@ func (s *UserStore) CreateUser(user *types.User) error {
 		return err
 	}
 
-    log.Printf("created new user `%s` with id %d\n", user.Username, user.Id)
+	log.Printf("created new user `%s` with id %d\n", user.Username, user.Id)
 	return nil
 }
