@@ -5,10 +5,11 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/sessions"
 	"github.com/iksuddle/regex-rank/config"
 	"github.com/iksuddle/regex-rank/database"
@@ -19,13 +20,13 @@ import (
 )
 
 const stateSessionName = "state-token"
-const authSessionName = "rgx-auth"
-const userIdKey = "user-id"
 
 var userStore *database.UserStore
 
 var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
+
+var jwtKey []byte
 
 func InitAuth(config *config.Config, db *sqlx.DB) {
 	authConfig = &oauth2.Config{
@@ -50,6 +51,8 @@ func InitAuth(config *config.Config, db *sqlx.DB) {
 	sessionStore.Options.Secure = true // some browsers consider http://localhost secure
 
 	userStore = database.NewUserStore(db)
+
+	jwtKey = []byte(config.JWTKey)
 }
 
 func LoginHandler(c echo.Context) error {
@@ -133,7 +136,27 @@ func LoginCallbackHandler(c echo.Context) error {
 		}
 	}
 
-	return c.HTML(http.StatusOK, fmt.Sprintf(loggedInView, user.Username, user.Id, user.AvatarUrl))
+	// create jwt
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.Id,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	jwtString, err := jwt.SignedString(jwtKey)
+	if err != nil {
+		log.Println("error when signing jwt ", err)
+		return err
+	}
+
+    c.SetCookie(&http.Cookie{
+        Name: "jwt",
+        Value: jwtString,
+        Path: "/",
+        Secure: true,
+        HttpOnly: true,
+        SameSite: http.SameSiteLaxMode,
+    })
+	return c.JSON(http.StatusOK, types.NewJWTResponse(jwtString))
 }
 
 func generateStateToken() string {

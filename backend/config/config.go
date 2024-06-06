@@ -13,6 +13,7 @@ type Config struct {
 	ClientId     string
 	ClientSecret string
 	SessionKey   string
+	JWTKey       string
 	DBUser       string
 	DBPassword   string
 	DBAddress    string
@@ -30,6 +31,7 @@ func NewConfig() *Config {
 		ClientId:     getEnv("CLIENT_ID"),
 		ClientSecret: getEnv("CLIENT_SECRET"),
 		SessionKey:   getEnv("SESSION_KEY"),
+		JWTKey:       getEnv("JWT_KEY"),
 		DBUser:       getEnv("DB_USER"),
 		DBPassword:   getEnv("DB_PASSWORD"),
 		DBAddress:    fmt.Sprintf("%s:%s", getEnv("DB_HOST"), getEnv("DB_PORT")),
