@@ -138,8 +138,10 @@ func LoginCallbackHandler(c echo.Context) error {
 
 	// create jwt
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.Id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"sub":     user.Id,
+		"name":    user.Username,
+		"picture": user.AvatarUrl,
 	})
 
 	jwtString, err := jwt.SignedString(jwtKey)
@@ -148,14 +150,16 @@ func LoginCallbackHandler(c echo.Context) error {
 		return err
 	}
 
-    c.SetCookie(&http.Cookie{
-        Name: "jwt",
-        Value: jwtString,
-        Path: "/",
-        Secure: true,
-        HttpOnly: true,
-        SameSite: http.SameSiteLaxMode,
-    })
+	c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    jwtString,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600,
+	})
+
 	return c.JSON(http.StatusOK, types.NewJWTResponse(jwtString))
 }
 
