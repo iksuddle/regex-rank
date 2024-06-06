@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -58,8 +58,7 @@ func InitAuth(config *config.Config, db *sqlx.DB) {
 func LoginHandler(c echo.Context) error {
 	stateSession, err := sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
-		log.Printf("error when getting session: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when getting session: %v\n", err))
 	}
 
 	state := generateStateToken()
@@ -74,14 +73,13 @@ func LoginHandler(c echo.Context) error {
 func LoginCallbackHandler(c echo.Context) error {
 	stateSession, err := sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
-		log.Printf("error when getting session: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when getting session: %v\n", err))
 	}
 
 	// verify that the states match
 	state := c.FormValue("state")
 	if state != stateSession.Values["state"] {
-		return echo.NewHTTPError(http.StatusForbidden, "state token mismatch")
+		return echo.NewHTTPError(http.StatusInternalServerError, "state token mismatch")
 	}
 	// delete the state token
 	stateSession.Options.MaxAge = -1
@@ -91,8 +89,7 @@ func LoginCallbackHandler(c echo.Context) error {
 	code := c.FormValue("code")
 	token, err := authConfig.Exchange(context.TODO(), code)
 	if err != nil {
-		log.Printf("error when exchanging code for token: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when exchanging code for token: %v\n", err))
 	}
 
 	client := authConfig.Client(context.TODO(), token)
@@ -100,23 +97,20 @@ func LoginCallbackHandler(c echo.Context) error {
 	// make a request to retrieve user data
 	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
-		log.Printf("error when creating request to retrieve user data: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when creating request to retrieve user data: %v\n", err))
 	}
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Printf("error when retrieving user data from github: %v\n", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when retrieving user data from github: %v\n", err))
 	}
 	defer res.Body.Close()
 
 	// get user data from response
 	var userData map[string]any
 	if err = json.NewDecoder(res.Body).Decode(&userData); err != nil {
-		log.Println("error when decoding user data")
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when decoding user data: %v\n", err))
 	}
 
 	// check if user exists
@@ -126,13 +120,12 @@ func LoginCallbackHandler(c echo.Context) error {
 		// user does not exist
 		user, err = types.NewUserFromData(userData)
 		if err != nil {
-			log.Printf("error when creating user %d\n", userGithubId)
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when creating user: %v\n", err))
 		}
+		// create new user in db
 		err = userStore.CreateUser(user)
 		if err != nil {
-			log.Printf("error when inserting user %d\n", user.Id)
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when inserting user: %v\n", err))
 		}
 	}
 
@@ -146,8 +139,7 @@ func LoginCallbackHandler(c echo.Context) error {
 
 	jwtString, err := jwt.SignedString(jwtKey)
 	if err != nil {
-		log.Println("error when signing jwt ", err)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("error when signing jwt: %v\n", err))
 	}
 
 	c.SetCookie(&http.Cookie{
@@ -161,6 +153,20 @@ func LoginCallbackHandler(c echo.Context) error {
 	})
 
 	return c.JSON(http.StatusOK, types.NewJWTResponse(jwtString))
+}
+
+func LogoutHandler(c echo.Context) error {
+    c.SetCookie(&http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+    })
+
+    return c.HTML(http.StatusOK, "<h1>Logged Out.</h1>")
 }
 
 func generateStateToken() string {

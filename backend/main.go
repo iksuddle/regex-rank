@@ -19,8 +19,8 @@ func main() {
 	e.GET("/", handlers.IndexHandler)
 	e.GET("/login", handlers.LoginHandler)
 	e.GET("/login/callback", handlers.LoginCallbackHandler)
-	// e.GET("/logout", LogoutHandler)
-	e.GET("/test", handlers.ProtectedTest, handlers.AuthRoute)
+	e.GET("/logout", handlers.LogoutHandler)
+	// e.GET("/test", handlers.TestAuthRoute, handlers.AuthRoute)
 
 	e.Logger.Fatal(e.Start(":" + config.Port))
 }
