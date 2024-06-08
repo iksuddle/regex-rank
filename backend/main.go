@@ -20,7 +20,7 @@ func main() {
 	e.GET("/login", handlers.LoginHandler)
 	e.GET("/login/callback", handlers.LoginCallbackHandler)
 	e.GET("/logout", handlers.LogoutHandler)
-	// e.GET("/test", handlers.TestAuthRoute, handlers.AuthRoute)
+	e.GET("/test", handlers.TestAuthRoute, handlers.AuthRoute)
 
 	e.Logger.Fatal(e.Start(":" + config.Port))
 }

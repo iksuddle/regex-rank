@@ -135,6 +135,7 @@ func LoginCallbackHandler(c echo.Context) error {
 		"sub":     user.Id,
 		"name":    user.Username,
 		"picture": user.AvatarUrl,
+		"created": user.CreatedAt,
 	})
 
 	jwtString, err := jwt.SignedString(jwtKey)
@@ -156,7 +157,7 @@ func LoginCallbackHandler(c echo.Context) error {
 }
 
 func LogoutHandler(c echo.Context) error {
-    c.SetCookie(&http.Cookie{
+	c.SetCookie(&http.Cookie{
 		Name:     "jwt",
 		Value:    "",
 		Path:     "/",
@@ -164,9 +165,9 @@ func LogoutHandler(c echo.Context) error {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
-    })
+	})
 
-    return c.HTML(http.StatusOK, "<h1>Logged Out.</h1>")
+	return c.HTML(http.StatusOK, "<h1>Logged Out.</h1>")
 }
 
 func generateStateToken() string {
