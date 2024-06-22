@@ -3,10 +3,10 @@ package types
 import "time"
 
 type User struct {
-	Id        int    `json:"id" db:"id"`
-	Username  string `json:"username" db:"username"`
-	AvatarUrl string `json:"avatar_url" db:"avatar_url"`
-	CreatedAt int64  `json:"created_at" db:"created_at"`
+	Id        int       `json:"id" db:"id"`
+	Username  string    `json:"username" db:"username"`
+	AvatarUrl string    `json:"avatar_url" db:"avatar_url"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 func NewUserFromData(userData map[string]any) (*User, error) {
@@ -15,7 +15,7 @@ func NewUserFromData(userData map[string]any) (*User, error) {
 		Id:        int(userGithubId),
 		Username:  userData["login"].(string),
 		AvatarUrl: userData["avatar_url"].(string),
-		CreatedAt: time.Now().Unix(),
+		CreatedAt: time.Now().UTC(),
 	}
 
 	return user, nil

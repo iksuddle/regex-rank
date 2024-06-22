@@ -26,6 +26,7 @@ func NewMySQLConfig(config *config.Config) *mysql.Config {
 	mysqlConfig.Net = "tcp"
 	mysqlConfig.Addr = config.DBAddress
 	mysqlConfig.DBName = config.DBName
+	mysqlConfig.ParseTime = true
 
 	return mysqlConfig
 }
