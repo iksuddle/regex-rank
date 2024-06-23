@@ -8,7 +8,7 @@ type Problem struct {
 type Statement struct {
 	Id        int    `json:"id" db:"id"`
 	ProblemId int    `json:"problem_id" db:"problem_id"`
-	Match     bool   `json:"match" db:"match"`
+	Match     string `json:"match" db:"match"`
 	Literal   string `json:"literal" db:"literal"`
 }
 
