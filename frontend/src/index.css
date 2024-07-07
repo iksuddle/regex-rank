@@ -1,0 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+} 
+
+body {
+    background: #f0eaea;
+    color: #1c1c1c;
+    font-family: 'sans';
+}
