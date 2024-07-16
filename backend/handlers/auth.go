@@ -5,8 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -19,8 +17,6 @@ import (
 )
 
 const sessionName = "rgx-session"
-
-var userStore *database.UserStore
 
 var authConfig *oauth2.Config
 var sessionStore *sessions.CookieStore
@@ -108,7 +104,6 @@ func LoginCallbackHandler(c echo.Context) error {
 	userGithubId := int(userData["id"].(float64))
 	user, err := userStore.GetUserById(userGithubId)
 	if err != nil {
-		log.Println(err.Error())
 		// user does not exist
 		user, err = types.NewUserFromData(userData)
 		if err != nil {
@@ -144,10 +139,4 @@ func generateStateToken() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
-}
-
-func newHTTPError(code int, message string, err error) *echo.HTTPError {
-	msg := fmt.Sprintf("%s: %s", message, err.Error())
-	log.Println(msg)
-	return echo.NewHTTPError(code, msg)
 }

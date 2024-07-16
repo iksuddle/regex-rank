@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 
 :root {
-    --font-family: "Source Code Pro", monospace;
+    --font-family: "source code pro", monospace;
+    --primary: #6666ff;
+    --default-transition: all 100ms ease-in-out;
 }
 
 .main {
@@ -14,6 +15,7 @@
 
 .regex-input {
     width: 80%;
+    max-width: 40rem;
     margin-top: 4rem;
 }
 
@@ -21,24 +23,20 @@
     height: 2.4rem;
     width: 100%;
     font-family: var(--font-family);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     outline: none;
     border: 2px solid #cccccc;
     padding: 0 0.4rem;
     border-radius: 5px;
     box-sizing: border-box;
-    transition: all 150ms ease-in-out;
+    transition: var(--default-transition);
 }
 
 .text-input:focus {
-    border-color: #9598fc;
+    /*border-color: #9598fc;*/
+    border-color: var(--primary);
 }
 
-@media (min-width: 640px) {
-    .regex-input {
-        width: 30rem;
-    }
-}
 
 .cases {
     box-sizing: border-box;
@@ -55,6 +53,9 @@
     height: 2rem;
 }
 
+.case > * {
+    transition: var(--default-transition);
+}
 
 .case p {
     width: 100%;
@@ -63,6 +64,7 @@
 
 .match-text {
     padding: 0 0.6rem;
+    font-weight: 600;
 }
 
 .match-color {
@@ -72,5 +74,14 @@
 
 .buttons {
     margin-top: 4rem;
-    color: #333333;
+}
+
+.buttons > * {
+    color: #aaaaaa;
+    transition: var(--default-transition);
+}
+
+.buttons > *:hover {
+    cursor: pointer;
+    color: var(--primary);
 }

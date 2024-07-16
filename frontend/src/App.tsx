@@ -2,7 +2,7 @@ import { MdBarChart, MdPerson } from "react-icons/md";
 import RegexInput from "./components/RegexInput";
 import "./App.css";
 
-function App() {
+export default function App() {
     return (
         <div className="main">
 
@@ -14,11 +14,9 @@ function App() {
             </div>
 
             <div className="buttons">
-                <MdPerson size={40}/>
-                <MdBarChart size={40}/>
+                <MdPerson size={40} />
+                <MdBarChart size={40} />
             </div>
         </div>
     )
 }
-
-export default App
