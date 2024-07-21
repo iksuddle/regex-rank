@@ -1,13 +1,28 @@
 import Case from "./Case";
 
-export default function Cases() {
+export default function Cases({ userInput }: any) {
+    const cases = [
+        { literal: "foo", match: true },
+        { literal: "bar", match: true },
+        { literal: "hello", match: false },
+        { literal: "world", match: false },
+    ];
+
+    const listItems = cases.map((c) => {
+        let re = new RegExp(userInput);
+
+        let m = re.test(c.literal);
+        if (userInput.trim().length === 0) {
+            m = false;
+        }
+
+        return <Case literal={c.literal} done={m} match={c.match} />
+    });
+
     return (
         <>
             <ul className="cases">
-                <Case literal="foo" done={1} match={true}/>
-                <Case literal="bar" done={false} match={true}/>
-                <Case literal="hello" done={true} match={false}/>
-                <Case literal="world" done={false} match={false}/>
+                {listItems}
             </ul>
         </>
     )
