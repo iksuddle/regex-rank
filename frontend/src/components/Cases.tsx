@@ -9,14 +9,28 @@ export default function Cases({ userInput }: any) {
     ];
 
     const listItems = cases.map((c) => {
-        let re = new RegExp(userInput);
+        try {
+            let re = new RegExp(userInput);
 
-        let m = re.test(c.literal);
-        if (userInput.trim().length === 0) {
-            m = false;
+            let m = re.test(c.literal);
+
+            if (userInput.trim().length === 0) {
+                m = false;
+            }
+
+            // invert status of cases that should not be matched
+            if (!c.match) {
+                m = !m;
+            }
+
+            return <Case literal={c.literal} done={m} match={c.match} />
+        }
+        catch (error) {
+            // todo: let parent access the error (maybe using global state)
+            console.log(error);
+            return <Case literal={c.literal} done={false} match={c.match} />
         }
 
-        return <Case literal={c.literal} done={m} match={c.match} />
     });
 
     return (

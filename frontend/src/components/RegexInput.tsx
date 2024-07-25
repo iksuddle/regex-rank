@@ -10,6 +10,10 @@ export default function RegexInput() {
 
     return (
         <>
+            <p style={{
+                color: "#e66c6c",
+                textAlign: "right",
+            }}>error message here</p>
             <input onChange={handleInputChange} value={userInput}
                 className="text-input"
                 placeholder="enter regex here..." />

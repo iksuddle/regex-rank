@@ -9,9 +9,13 @@ export default function Case({ match, literal, done }: any) {
 
     return (
         <li className="case">
-            <span className="match-text" style={match ? { color: matchColor } : { color: ignoreColor }}>{match ? "match" : "ignore"}</span>
-            <p style={done ? { color: "black" } : { color: "grey" }}>{literal}</p>
-            <span className="match-color" style={match ? { background: matchColor } : { background: ignoreColor }}></span>
+            <span className="match-text" style={match ? { color: matchColor } : { color: ignoreColor }}>
+                {match ? "match" : "ignore"}
+            </span>
+            <p style={done ? { color: "black" } : { color: "grey" }}>
+                {literal}
+            </p>
+            <span className="match-color" style={match ? { background: matchColor } : { background: ignoreColor }} />
         </li>
     )
 }
