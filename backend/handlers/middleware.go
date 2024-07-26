@@ -43,14 +43,11 @@ func AuthRoute(next echo.HandlerFunc) echo.HandlerFunc {
 		// read claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			// store user in context
-
 			userId := int(claims["sub"].(float64))
-			// c.Set("user_id", userId)
 			user, err := userStore.GetUserById(userId)
 			if err != nil {
 				return newHTTPError(http.StatusInternalServerError, "user not found", err)
 			}
-
 			c.Set(contextUserKey, user)
 		} else {
 			return newHTTPError(http.StatusForbidden, "error reading claims", err)

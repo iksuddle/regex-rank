@@ -122,7 +122,7 @@ func LoginCallbackHandler(c echo.Context) error {
 	}
 
 	// todo: remove
-	// sets a cookie for testing purposes
+	// sets a cookie for dev purposes
 	c.SetCookie(&http.Cookie{
 		Name:     "jwt",
 		Value:    jwt,

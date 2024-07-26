@@ -37,6 +37,29 @@
     border-color: var(--primary);
 }
 
+.input-div {
+    display: flex;
+}
+
+.input-div input {
+    margin-right: 0.2rem;
+}
+
+.submit {
+    background: #cccccc;
+    border: 2px solid #bbbbbb;
+    padding: 0 1rem;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 150ms ease-in-out;
+}
+.submit:hover {
+    background: var(--primary);
+    border: 2px solid #5555ff;
+    cursor: pointer;
+}
 
 .cases {
     box-sizing: border-box;
