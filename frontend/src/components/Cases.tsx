@@ -1,12 +1,14 @@
 import Case from "./Case";
 
-export default function Cases({ userInput }: any) {
+export default function Cases({ userInput, setErrorMessage, setAllDone }: any) {
     const cases = [
         { literal: "foo", match: true },
         { literal: "bar", match: true },
         { literal: "hello", match: false },
         { literal: "world", match: false },
     ];
+
+    setAllDone(true);
 
     const listItems = cases.map((c) => {
         try {
@@ -23,14 +25,20 @@ export default function Cases({ userInput }: any) {
                 m = !m;
             }
 
+            setErrorMessage("");
+
+            // if any cases aren't finsihed, we are not done
+            if (!m) {
+                setAllDone(false);
+            }
+
             return <Case literal={c.literal} done={m} match={c.match} />
         }
-        catch (error) {
-            // todo: let parent access the error (maybe using global state)
-            console.log(error);
+        catch (error: any) {
+            setAllDone(false);
+            setErrorMessage(error.message);
             return <Case literal={c.literal} done={false} match={c.match} />
         }
-
     });
 
     return (

@@ -55,9 +55,15 @@
     align-items: center;
     transition: all 150ms ease-in-out;
 }
-.submit:hover {
+.submit-done {
     background: var(--primary);
     border: 2px solid #5555ff;
+    cursor: pointer;
+}
+
+.submit-done:hover {
+    background: #8888ff;
+    border: 2px solid #7777ff;
     cursor: pointer;
 }
 
