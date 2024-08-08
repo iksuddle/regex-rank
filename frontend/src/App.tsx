@@ -1,20 +1,21 @@
 import { MdBarChart, MdPerson } from "react-icons/md";
-import RegexInput from "./components/RegexInput";
-import "./App.css";
+import { Outlet, Link } from "react-router-dom";
 
 export default function App() {
     return (
         <div className="main">
 
-            <h1>REGEX RANK</h1>
+            <Link style={{ textDecoration: "none", color: "#333333" }} to={``}><h1>REGEX RANK</h1></Link>
             <p>weekly regex problems</p>
 
-            <div className="regex-input">
-                <RegexInput />
+            <div style={{ height: "15rem" }} className="regex-input">
+                <Outlet />
             </div>
 
             <div className="buttons">
-                <MdPerson size={40} />
+                <Link to={`login`}>
+                    <MdPerson size={40} />
+                </Link>
                 <MdBarChart size={40} />
             </div>
         </div>
