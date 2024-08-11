@@ -123,14 +123,14 @@ func LoginCallbackHandler(c echo.Context) error {
 
 	// todo: remove
 	// sets a cookie for dev purposes
-	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
-		Value:    jwt,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-	})
+	// c.SetCookie(&http.Cookie{
+	// 	Name:     "jwt",
+	// 	Value:    jwt,
+	// 	Path:     "/",
+	// 	HttpOnly: true,
+	// 	Secure:   true,
+	// 	SameSite: http.SameSiteLaxMode,
+	// })
 
 	return c.JSON(http.StatusCreated, map[string]string{"token": jwt})
 }

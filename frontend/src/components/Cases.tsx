@@ -1,51 +1,56 @@
+import { useEffect } from "react";
 import Case from "./Case";
 
 export default function Cases({ userInput, setErrorMessage, setAllDone }: any) {
-    const cases = [
-        { literal: "foo", match: true },
-        { literal: "bar", match: true },
-        { literal: "hello", match: false },
-        { literal: "world", match: false },
+    const casesData = [
+        { literal: "foo", ignore: false },
+        { literal: "bar", ignore: false },
+        { literal: "hello", ignore: true },
+        { literal: "world", ignore: true },
     ];
 
-    setAllDone(true);
+    let errorMessage = "";
+    let done = true;
 
-    const listItems = cases.map((c) => {
+    const listItems = casesData.map((c, index) => {
         try {
-            let re = new RegExp(userInput);
+            const re = new RegExp(userInput);
 
-            let m = re.test(c.literal);
+            let patternFound = re.test(c.literal);
 
+            // if the user didn't enter anything then the pattern shouldn't match
             if (userInput.trim().length === 0) {
-                m = false;
+                patternFound = false;
             }
 
-            // invert status of cases that should not be matched
-            if (!c.match) {
-                m = !m;
+            // invert status of cases that should be ignored
+            if (c.ignore) {
+                patternFound = !patternFound;
             }
 
-            setErrorMessage("");
-
-            // if any cases aren't finsihed, we are not done
-            if (!m) {
-                setAllDone(false);
+            // if any aren't matching, we are not done
+            if (!patternFound) {
+                done = false;
             }
 
-            return <Case literal={c.literal} done={m} match={c.match} />
+            return <Case literal={c.literal} ignore={c.ignore} done={patternFound} key={index} />
         }
+        // if there's any errors, no pattern should be matched
         catch (error: any) {
-            setAllDone(false);
-            setErrorMessage(error.message);
-            return <Case literal={c.literal} done={false} match={c.match} />
+            done = false;
+            errorMessage = error.message;
+            return <Case literal={c.literal} ignore={c.ignore} done={false} key={index} />
         }
     });
 
+    useEffect(() => {
+        setErrorMessage(errorMessage);
+        setAllDone(done);
+    });
+
     return (
-        <>
-            <ul className="cases">
-                {listItems}
-            </ul>
-        </>
+        <ul className="cases">
+            {listItems}
+        </ul>
     )
 }

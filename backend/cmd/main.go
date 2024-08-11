@@ -5,6 +5,7 @@ import (
 	"github.com/iksuddle/regex-rank/database"
 	"github.com/iksuddle/regex-rank/handlers"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -14,7 +15,13 @@ func main() {
 
 	handlers.InitAuth(config, db)
 
-    e := echo.New()
+	e := echo.New()
+
+	// todo: move url to .env
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+        AllowOrigins: []string{"http://localhost:5173"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	e.GET("/", handlers.IndexHandler)
 	e.GET("/login", handlers.LoginHandler)

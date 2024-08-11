@@ -1,4 +1,4 @@
-export default function Case({ match, literal, done }: any) {
+export default function Case({ ignore, literal, done }: any) {
     let matchColor = "#a4cf9b";
     let ignoreColor = "#e8a7a7";
 
@@ -9,13 +9,13 @@ export default function Case({ match, literal, done }: any) {
 
     return (
         <li className="case">
-            <span className="match-text" style={match ? { color: matchColor } : { color: ignoreColor }}>
-                {match ? "match" : "ignore"}
+            <span className="match-text" style={ignore ? { color: ignoreColor } : { color: matchColor }}>
+                {ignore ? "ignore" : "match"}
             </span>
             <p style={done ? { color: "black" } : { color: "grey" }}>
                 {literal}
             </p>
-            <span className="match-color" style={match ? { background: matchColor } : { background: ignoreColor }} />
+            <span className="match-color" style={ignore ? { background: ignoreColor } : { background: matchColor }} />
         </li>
     )
 }
