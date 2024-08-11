@@ -14,7 +14,7 @@ func main() {
 
 	handlers.InitAuth(config, db)
 
-	e := echo.New()
+    e := echo.New()
 
 	e.GET("/", handlers.IndexHandler)
 	e.GET("/login", handlers.LoginHandler)
