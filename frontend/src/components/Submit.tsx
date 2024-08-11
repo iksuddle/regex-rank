@@ -7,9 +7,9 @@ export default function Submit({ done }: any) {
         classList = classList.concat(" submit-done");
     }
 
-    return <>
+    return (
         <button className={classList} disabled={!done}>
             <MdArrowForwardIos size={20} color="white" />
         </button>
-    </>
+    )
 }
