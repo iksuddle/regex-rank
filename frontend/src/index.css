@@ -14,7 +14,11 @@ body {
 
 :root {
     --font-family: "source code pro", monospace;
-    --primary: #6666ff;
+    --primary: #222222;
+    --primary-light: #555555;
+    --grey: #bababa;
+    --grey-light: #dfdfdf;
+    --light: #eeeeee;
     --default-transition: all 100ms ease-in-out;
 }
 
@@ -37,7 +41,7 @@ body {
     font-family: var(--font-family);
     font-size: 1.1rem;
     outline: none;
-    border: 2px solid #cccccc;
+    border: 2px solid var(--grey);
     padding: 0 0.4rem;
     border-radius: 5px;
     box-sizing: border-box;
@@ -45,7 +49,6 @@ body {
 }
 
 .text-input:focus {
-    /*border-color: #9598fc;*/
     border-color: var(--primary);
 }
 
@@ -58,30 +61,28 @@ body {
 }
 
 .submit {
-    background: #cccccc;
-    border: 2px solid #bbbbbb;
+    background: var(--grey);
     padding: 0 1rem;
     border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 150ms ease-in-out;
+    border: none; 
 }
 .submit-done {
     background: var(--primary);
-    border: 2px solid #5555ff;
     cursor: pointer;
 }
 
 .submit-done:hover {
-    background: #8888ff;
-    border: 2px solid #7777ff;
+    background: var(--primary-light);
     cursor: pointer;
 }
 
 .cases {
     box-sizing: border-box;
-    background: #dfdfdf;
+    background: var(--grey-light);
     margin-top: 2rem;
     list-style: none;
     border-radius: 5px;
@@ -118,28 +119,28 @@ body {
 }
 
 .buttons > * {
-    color: #aaaaaa;
+    color: var(--grey);
     transition: var(--default-transition);
 }
 
 .buttons > *:hover {
     cursor: pointer;
-    color: var(--primary);
+    color: var(--primary-light);
 }
 
 .action-button {
-    color: #eeeeee;
-    background: #21262d;
-    border-radius: 5px;
+    color: var(--light);
+    background: var(--primary);
+    border: none;
+    border-radius: 4px;
     font-size: 1rem;
+    font-weight: bold;
     padding: 0.5rem 1.2rem;
-    border: 2px solid #40464d;
 }
 
 
 .action-button:hover {
-    color: #fefefe;
-    background: #3a3f42;
-    border: 2px solid #40464d;
+    color: var(--light);
+    background: var(--primary-light);
     cursor: pointer;
 }

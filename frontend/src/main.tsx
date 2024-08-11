@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import ErrorPage from "./error-page.tsx";
-import Login from "./routes/Login.tsx";
+import Profile from "./routes/profile.tsx";
 import "./index.css";
 import RegexInput from "./components/RegexInput.tsx";
 
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/login",
-                element: <Login />,
+                element: <Profile />,
             },
             {
                 path: "/",
