@@ -11,11 +11,10 @@ import (
 
 const contextUserKey string = "rgx-user"
 
-// todo: use Authorization header instead of cookie
 func AuthRoute(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// get the jwt token
-		cookie, err := c.Cookie("jwt")
+		cookie, err := c.Cookie("rgx_jwt")
 		if err != nil {
 			return newHTTPError(http.StatusForbidden, "could not retrieve jwt from cookie", err)
 		}

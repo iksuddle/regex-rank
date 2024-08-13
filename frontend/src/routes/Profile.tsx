@@ -1,20 +1,31 @@
-import Cookies from "js-cookie";
 import Login from "../components/Login";
 import User from "../components/User";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Cookies from 'js-cookie'
 
 export default function Profile() {
-    let [params, _setParams] = useSearchParams();
+    let [user, setUser] = useState({});
 
-    if (params.size > 0) {
-        let _id = params.get("id")
-        // todo: get user by id
+    let loggedIn = Cookies.get("rgx_loggedin");
+
+    if (loggedIn) {
+        useEffect(() => {
+            fetch("http://localhost:3000/user", {
+                method: "get",
+                credentials: "include"
+            })
+                .then((res) => {
+                    res.json().then((data) => {
+                        setUser(data);
+                    })
+                })
+                .catch((_) => {
+                    setUser({})
+                })
+        }, []);
+
     }
-
-    let loggedInCookie = Cookies.get("rgx_loggedin");
-    console.log(loggedInCookie)
-
     return <>
-        {loggedInCookie ? <User /> : <Login />}
+        {loggedIn ? <User user={user} /> : <Login />}
     </>
 }

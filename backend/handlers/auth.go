@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -140,8 +139,22 @@ func LoginCallbackHandler(c echo.Context) error {
 	})
 
 	// todo: move url to .env
-	url := fmt.Sprintf("http://localhost:5173/login?id=%d", user.Id)
+	url := "http://localhost:5173/login"
 	return c.Redirect(http.StatusPermanentRedirect, url)
+}
+
+func LogoutHandler(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:   "rgx_loggedin",
+		MaxAge: -1,
+	})
+
+	c.SetCookie(&http.Cookie{
+		Name:   "rgx_jwt",
+		MaxAge: -1,
+	})
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "successfully logged out"})
 }
 
 func generateStateToken() string {

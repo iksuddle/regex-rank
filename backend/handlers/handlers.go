@@ -12,8 +12,13 @@ import (
 
 var userStore *database.UserStore
 
-func IndexHandler(c echo.Context) error {
-	return c.HTML(http.StatusOK, `<h1>Login with <a href="/login">GitHub</a></h1>`)
+func GetUser(c echo.Context) error {
+	user, ok := c.Get(contextUserKey).(*types.User)
+	if !ok {
+		return newHTTPError(http.StatusInternalServerError, "could not retrieve user from context", nil)
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
 
 func TestAuthRoute(c echo.Context) error {
