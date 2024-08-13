@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -14,6 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
 )
 
 const sessionName = "rgx-session"
@@ -28,10 +30,7 @@ func InitAuth(config *config.Config, db *sqlx.DB) {
 		ClientID:     config.ClientId,
 		ClientSecret: config.ClientSecret,
 		RedirectURL:  "http://localhost:" + config.Port + "/login/callback",
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://github.com/login/oauth/authorize",
-			TokenURL: "https://github.com/login/oauth/access_token",
-		},
+		Endpoint:     github.Endpoint,
 	}
 
 	sessionStore = sessions.NewCookieStore([]byte(config.SessionKey))
@@ -61,14 +60,14 @@ func LoginHandler(c echo.Context) error {
 }
 
 func LoginCallbackHandler(c echo.Context) error {
-	stateSession, err := sessionStore.Get(c.Request(), sessionName)
+	session, err := sessionStore.Get(c.Request(), sessionName)
 	if err != nil {
 		return newHTTPError(http.StatusInternalServerError, "error when getting session", err)
 	}
 
 	// verify that the states match
 	state := c.FormValue("state")
-	if state != stateSession.Values["state"] {
+	if state != session.Values["state"] {
 		return newHTTPError(http.StatusInternalServerError, "state token mismatch", nil)
 	}
 
@@ -121,18 +120,28 @@ func LoginCallbackHandler(c echo.Context) error {
 		return newHTTPError(http.StatusInternalServerError, "error creating jwt", err)
 	}
 
-	// todo: remove
-	// sets a cookie for dev purposes
-	// c.SetCookie(&http.Cookie{
-	// 	Name:     "jwt",
-	// 	Value:    jwt,
-	// 	Path:     "/",
-	// 	HttpOnly: true,
-	// 	Secure:   true,
-	// 	SameSite: http.SameSiteLaxMode,
-	// })
+	c.SetCookie(&http.Cookie{
+		Name:     "rgx_jwt",
+		Value:    jwt,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
 
-	return c.JSON(http.StatusCreated, map[string]string{"token": jwt})
+	// this cookie is used by the front end to determine if a user is logged in
+	c.SetCookie(&http.Cookie{
+		Name:     "rgx_loggedin",
+		Value:    "true",
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	// todo: move url to .env
+	url := fmt.Sprintf("http://localhost:5173/login?id=%d", user.Id)
+	return c.Redirect(http.StatusPermanentRedirect, url)
 }
 
 func generateStateToken() string {

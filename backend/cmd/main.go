@@ -19,8 +19,7 @@ func main() {
 
 	// todo: move url to .env
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-        AllowOrigins: []string{"http://localhost:5173"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins: []string{"http://localhost:5173"},
 	}))
 
 	e.GET("/", handlers.IndexHandler)

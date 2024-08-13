@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import ErrorPage from "./error-page.tsx";
-import Profile from "./routes/profile.tsx";
+import Profile from "./routes/Profile.tsx";
 import "./index.css";
 import RegexInput from "./components/RegexInput.tsx";
 
