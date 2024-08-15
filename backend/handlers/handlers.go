@@ -38,4 +38,5 @@ func newHTTPError(code int, message string, err error) *echo.HTTPError {
 	msg := fmt.Sprintf("%s: %s", message, err.Error())
 	log.Println(msg)
 	return echo.NewHTTPError(code, msg)
+
 }

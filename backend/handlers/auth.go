@@ -126,16 +126,7 @@ func LoginCallbackHandler(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
-	})
-
-	// this cookie is used by the front end to determine if a user is logged in
-	c.SetCookie(&http.Cookie{
-		Name:     "rgx_loggedin",
-		Value:    "true",
-		Path:     "/",
-		HttpOnly: false,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		MaxAge:   86400,
 	})
 
 	// todo: move url to .env
@@ -144,11 +135,6 @@ func LoginCallbackHandler(c echo.Context) error {
 }
 
 func LogoutHandler(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:   "rgx_loggedin",
-		MaxAge: -1,
-	})
-
 	c.SetCookie(&http.Cookie{
 		Name:   "rgx_jwt",
 		MaxAge: -1,
