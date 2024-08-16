@@ -30,6 +30,10 @@ func InitAuth(config *config.Config, db *sqlx.DB) {
 		ClientSecret: config.ClientSecret,
 		RedirectURL:  "http://localhost:" + config.Port + "/login/callback",
 		Endpoint:     github.Endpoint,
+		Scopes: []string{
+			"read:user",
+			"user:email",
+		},
 	}
 
 	sessionStore = sessions.NewCookieStore([]byte(config.SessionKey))

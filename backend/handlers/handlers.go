@@ -12,6 +12,22 @@ import (
 
 var userStore *database.UserStore
 
+func DeleteUser(c echo.Context) error {
+	user, ok := c.Get(contextUserKey).(*types.User)
+	if !ok {
+		return newHTTPError(http.StatusInternalServerError, "could not retrieve user from context", nil)
+	}
+
+	err := userStore.DeleteUser(user.Id)
+	if err != nil {
+		return newHTTPError(http.StatusInternalServerError, "error deleting user", err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "user deleted successfully",
+	})
+}
+
 func GetUser(c echo.Context) error {
 	user, ok := c.Get(contextUserKey).(*types.User)
 	if !ok {

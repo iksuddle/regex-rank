@@ -43,3 +43,13 @@ func (s *UserStore) CreateUser(user *types.User) error {
 	log.Printf("created new user `%s` with id %d\n", user.Username, user.Id)
 	return nil
 }
+
+func (s *UserStore) DeleteUser(id int) error {
+	_, err := s.db.Exec("DELETE FROM users WHERE id=?", id)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("deleted user %d\n", id)
+	return nil
+}

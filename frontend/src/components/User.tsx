@@ -25,6 +25,26 @@ export default function User({ user }: any) {
         }
     }
 
+    async function handleUserDelete() {
+        let req = new Request(
+            "http://localhost:3000/delete",
+            { method: "get", credentials: "include" }
+        );
+
+        try {
+            const res = await fetch(req);
+            if (!res.ok) {
+                let errorMessage = await res.json();
+                throw new Error(errorMessage.message);
+            }
+
+            await handleUserLogout();
+        }
+        catch (error: any) {
+            console.log(error.message);
+        }
+    }
+
     return <>
         <div style={{ display: "flex" }}>
             <img src={user.avatar_url} style={{ width: "100px", height: "100px", borderRadius: "50%" }} />
@@ -33,8 +53,14 @@ export default function User({ user }: any) {
                 <p>Account created on {created}</p>
                 <button
                     onClick={handleUserLogout}
-                    className="action-button" style={{ fontWeight: "400", marginTop: "0.5rem" }}>
+                    className="action-button" >
                     logout
+                </button>
+
+                <button
+                    onClick={handleUserDelete}
+                    className="action-button">
+                    delete
                 </button>
             </div>
         </div>
