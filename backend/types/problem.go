@@ -1,8 +1,12 @@
 package types
 
+import (
+	"time"
+)
+
 type Problem struct {
-	Id          int    `json:"id" db:"id"`
-	Description string `json:"description" db:"description"`
+	Id        int       `json:"id" db:"id"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 type Statement struct {
@@ -17,4 +21,10 @@ type Solution struct {
 	UserId    int    `json:"user_id" db:"user_id"`
 	ProblemId int    `json:"problem_id" db:"problem_id"`
 	Literal   string `json:"literal" db:"literal"`
+}
+
+func NewProblem() Problem {
+	return Problem{
+		CreatedAt: time.Now(),
+	}
 }

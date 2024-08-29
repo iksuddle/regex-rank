@@ -27,7 +27,7 @@ func main() {
 	e.GET("/login/callback", handlers.LoginCallbackHandler)
 	e.GET("/logout", handlers.LogoutHandler)
 
-	e.GET("/test", handlers.TestAuthRoute, handlers.AuthRoute)
+	// e.GET("/test", handlers.TestAuthRoute, handlers.AuthRoute)
 	e.GET("/user", handlers.GetUser, handlers.AuthRoute)
 	e.GET("/delete", handlers.DeleteUser, handlers.AuthRoute)
 

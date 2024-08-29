@@ -1,5 +1,5 @@
 create table if not exists solutions (
-    `id` int not null,
+    `id` int not null auto_increment,
     `user_id` int not null,
     `problem_id` int not null,
     `literal` varchar(255) not null,
