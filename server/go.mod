@@ -3,6 +3,7 @@ module github.com/iksuddle/regex-rank
 go 1.22.2
 
 require (
+	github.com/BurntSushi/toml v1.4.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/gorilla/sessions v1.2.2
@@ -13,9 +14,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 )

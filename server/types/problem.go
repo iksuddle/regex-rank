@@ -25,6 +25,14 @@ type Solution struct {
 
 func NewProblem() Problem {
 	return Problem{
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
+	}
+}
+
+func NewStatement(problemId int, match string, literal string) Statement {
+	return Statement{
+		ProblemId: problemId,
+		Match:     match,
+		Literal:   literal,
 	}
 }

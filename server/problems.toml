@@ -1,9 +1,7 @@
-match = [
-    "foo",
-    "bar"
+Match = [
+    "foo", "bar"
 ]
 
-ignore = [
-    "hello",
-    "world"
+Ignore = [
+    "hello", "world"
 ]

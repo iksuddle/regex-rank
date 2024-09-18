@@ -10,11 +10,21 @@ import (
 	"github.com/iksuddle/regex-rank/types"
 )
 
+// read toml containing problem and store in db with unix date as key
 func main() {
-	path := os.Args[len(os.Args)-1]
+	// read path from args
+	args := os.Args[1:]
+	if len(args) < 1 {
+		log.Fatal("usage: make create [path]")
+	}
 
-	config := config.NewConfig()
-	db := database.NewDB(database.NewMySQLConfig(config))
+	path := args[0]
+
+	// create new problem store
+	db := database.NewDB(database.NewMySQLConfig(
+		config.NewConfig(),
+	))
+	store := database.NewProblemStore(db)
 
 	var statements struct {
 		Match  []string
@@ -22,34 +32,28 @@ func main() {
 	}
 
 	_, err := toml.DecodeFile(path, &statements)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	p := types.NewProblem()
-
-	result, err := db.Exec("INSERT INTO problems (created_at) VALUES (?)", p.CreatedAt)
+	// create problem
+	problem := types.NewProblem()
+	problemId, err := store.CreateProblem(&problem)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("problem #%d created\n", id)
 
 	for _, s := range statements.Match {
-		_, err := db.Exec("INSERT INTO statements (problem_id, `match`, literal) VALUES (?, ?, ?)", id, true, s)
+		statement := types.NewStatement(problemId, "m", s)
+		_, err := store.CreateStatement(&statement)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	for _, s := range statements.Ignore {
-		_, err := db.Exec("INSERT INTO statements (problem_id, `match`, literal) VALUES (?, ?, ?)", id, false, s)
+		statement := types.NewStatement(problemId, "i", s)
+		store.CreateStatement(&statement)
 		if err != nil {
 			log.Fatal(err)
 		}

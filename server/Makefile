@@ -15,4 +15,4 @@ migrate-down:
 	go run ./cmd/migrate/main.go down
 
 create: problems.toml
-	go run ./cmd/create/main.go problems.toml
+	@go run ./cmd/create/ problems.toml
