@@ -1,5 +1,5 @@
 build:
-	go build -o ./bin/rgx ./cmd/main.go
+	go build -o ./bin/rgx ./cmd/api/
 
 run: build
 	./bin/rgx

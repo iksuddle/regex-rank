@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"fmt"
@@ -9,9 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const contextUserKey string = "rgx-user"
-
-func AuthRoute(next echo.HandlerFunc) echo.HandlerFunc {
+func (app *app) authRoute(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// get the jwt token
 		cookie, err := c.Cookie("rgx_jwt")
@@ -26,7 +24,7 @@ func AuthRoute(next echo.HandlerFunc) echo.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return jwtKey, nil
+			return app.auth.jwtKey, nil
 		})
 		if err != nil {
 			log.Printf("could not validate jwt token %v\n", err)
@@ -43,7 +41,7 @@ func AuthRoute(next echo.HandlerFunc) echo.HandlerFunc {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			// store user in context
 			userId := int(claims["sub"].(float64))
-			user, err := userStore.GetUserById(userId)
+			user, err := app.store.Users.GetUserById(userId)
 			if err != nil {
 				return newHTTPError(http.StatusInternalServerError, "user not found", err)
 			}

@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"context"
@@ -8,10 +8,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/sessions"
-	"github.com/iksuddle/regex-rank/config"
 	"github.com/iksuddle/regex-rank/database"
 	"github.com/iksuddle/regex-rank/types"
-	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
@@ -19,36 +17,39 @@ import (
 
 const sessionName = "rgx-session"
 
-var authConfig *oauth2.Config
-var sessionStore *sessions.CookieStore
-
-var jwtKey []byte
-
-func InitAuth(config *config.Config, db *sqlx.DB) {
-	authConfig = &oauth2.Config{
-		ClientID:     config.ClientId,
-		ClientSecret: config.ClientSecret,
-		RedirectURL:  "http://localhost:" + config.Port + "/login/callback",
-		Endpoint:     github.Endpoint,
-		Scopes: []string{
-			"read:user",
-			"user:email",
-		},
-	}
-
-	sessionStore = sessions.NewCookieStore([]byte(config.SessionKey))
-	sessionStore.Options.Path = "/"
-	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.SameSite = http.SameSiteLaxMode
-	sessionStore.Options.Secure = true // some browsers consider http://localhost secure
-
-	userStore = database.NewUserStore(db)
-
-	jwtKey = []byte(config.JWTKey)
+type auth struct {
+	authConfig   *oauth2.Config
+	sessionStore *sessions.CookieStore
+	userStore    *database.UserStore
+	jwtKey       []byte
 }
 
-func LoginHandler(c echo.Context) error {
-	session, err := sessionStore.Get(c.Request(), sessionName)
+func initAuth(config *config) *auth {
+	a := &auth{
+		authConfig: &oauth2.Config{
+			ClientID:     config.clientId,
+			ClientSecret: config.clientSecret,
+			RedirectURL:  "http://localhost:" + config.port + "/login/callback",
+			Endpoint:     github.Endpoint,
+			Scopes: []string{
+				"read:user",
+				"user:email",
+			},
+		},
+		sessionStore: sessions.NewCookieStore([]byte(config.sessionKey)),
+		jwtKey:       []byte(config.jwtKey),
+	}
+
+	a.sessionStore.Options.Path = "/"
+	a.sessionStore.Options.HttpOnly = true
+	a.sessionStore.Options.SameSite = http.SameSiteLaxMode
+	a.sessionStore.Options.Secure = true // some browsers consider http://localhost secure
+
+	return a
+}
+
+func (app *app) loginHandler(c echo.Context) error {
+	session, err := app.auth.sessionStore.Get(c.Request(), sessionName)
 	if err != nil {
 		return newHTTPError(http.StatusInternalServerError, "error when getting session", err)
 	}
@@ -58,12 +59,12 @@ func LoginHandler(c echo.Context) error {
 
 	session.Save(c.Request(), c.Response().Writer)
 
-	url := authConfig.AuthCodeURL(state) // github doesn't support PKCE yet
+	url := app.auth.authConfig.AuthCodeURL(state) // github doesn't support PKCE yet
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func LoginCallbackHandler(c echo.Context) error {
-	session, err := sessionStore.Get(c.Request(), sessionName)
+func (app *app) loginCallbackHandler(c echo.Context) error {
+	session, err := app.auth.sessionStore.Get(c.Request(), sessionName)
 	if err != nil {
 		return newHTTPError(http.StatusInternalServerError, "error when getting session", err)
 	}
@@ -76,12 +77,12 @@ func LoginCallbackHandler(c echo.Context) error {
 
 	// exchange code for token
 	code := c.FormValue("code")
-	token, err := authConfig.Exchange(context.TODO(), code)
+	token, err := app.auth.authConfig.Exchange(context.TODO(), code)
 	if err != nil {
 		return newHTTPError(http.StatusInternalServerError, "error when exchanging code for token", err)
 	}
 
-	client := authConfig.Client(context.TODO(), token)
+	client := app.auth.authConfig.Client(context.TODO(), token)
 
 	// make a request to retrieve user data
 	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
@@ -104,7 +105,7 @@ func LoginCallbackHandler(c echo.Context) error {
 
 	// check if user exists
 	userGithubId := int(userData["id"].(float64))
-	user, err := userStore.GetUserById(userGithubId)
+	user, err := app.store.Users.GetUserById(userGithubId)
 	if err != nil {
 		// user does not exist
 		user, err = types.NewUserFromData(userData)
@@ -112,13 +113,13 @@ func LoginCallbackHandler(c echo.Context) error {
 			return newHTTPError(http.StatusInternalServerError, "error when creating user", err)
 		}
 		// create new user in db
-		err = userStore.CreateUser(user)
+		err = app.store.Users.CreateUser(user)
 		if err != nil {
 			return newHTTPError(http.StatusInternalServerError, "error when inserting user", err)
 		}
 	}
 
-	jwt, err := types.NewJWT(user.Id, jwtKey)
+	jwt, err := types.NewJWT(user.Id, app.auth.jwtKey)
 	if err != nil {
 		return newHTTPError(http.StatusInternalServerError, "error creating jwt", err)
 	}
@@ -138,7 +139,7 @@ func LoginCallbackHandler(c echo.Context) error {
 	return c.Redirect(http.StatusPermanentRedirect, url)
 }
 
-func LogoutHandler(c echo.Context) error {
+func (app *app) logoutHandler(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:   "rgx_jwt",
 		MaxAge: -1,
