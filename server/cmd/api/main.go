@@ -1,14 +1,15 @@
 package main
 
 import (
+	"github.com/iksuddle/regex-rank/config"
 	"github.com/iksuddle/regex-rank/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	config := newConfig()
-	db := database.NewDB(newMySQLConfig(config))
+	config := config.NewConfig()
+	db := database.NewDB(config)
 
 	app := &app{
 		config: config,
@@ -32,5 +33,5 @@ func main() {
 	e.GET("/user", app.getUserHandler, app.authRoute)
 	e.GET("/delete", app.deleteUserHandler, app.authRoute)
 
-	e.Logger.Fatal(e.Start(":" + config.port))
+	e.Logger.Fatal(e.Start(":" + config.Port))
 }

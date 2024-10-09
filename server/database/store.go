@@ -5,11 +5,13 @@ import (
 )
 
 type Store struct {
-	Users *UserStore
+	Users    *UserStore
+	Problems *ProblemStore
 }
 
 func NewStore(db *sqlx.DB) *Store {
 	return &Store{
 		Users: NewUserStore(db),
+        Problems: NewProblemStore(db),
 	}
 }

@@ -21,9 +21,7 @@ func main() {
 	path := args[0]
 
 	// create new problem store
-	db := database.NewDB(database.NewMySQLConfig(
-		config.NewConfig(),
-	))
+	db := database.NewDB(config.NewConfig())
 	store := database.NewProblemStore(db)
 
 	var statements struct {

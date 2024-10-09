@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/sessions"
+	"github.com/iksuddle/regex-rank/config"
 	"github.com/iksuddle/regex-rank/database"
 	"github.com/iksuddle/regex-rank/types"
 	"github.com/labstack/echo/v4"
@@ -24,20 +25,20 @@ type auth struct {
 	jwtKey       []byte
 }
 
-func initAuth(config *config) *auth {
+func initAuth(config *config.Config) *auth {
 	a := &auth{
 		authConfig: &oauth2.Config{
-			ClientID:     config.clientId,
-			ClientSecret: config.clientSecret,
-			RedirectURL:  "http://localhost:" + config.port + "/login/callback",
+			ClientID:     config.ClientId,
+			ClientSecret: config.ClientSecret,
+			RedirectURL:  "http://localhost:" + config.Port + "/login/callback",
 			Endpoint:     github.Endpoint,
 			Scopes: []string{
 				"read:user",
 				"user:email",
 			},
 		},
-		sessionStore: sessions.NewCookieStore([]byte(config.sessionKey)),
-		jwtKey:       []byte(config.jwtKey),
+		sessionStore: sessions.NewCookieStore([]byte(config.SessionKey)),
+		jwtKey:       []byte(config.JwtKey),
 	}
 
 	a.sessionStore.Options.Path = "/"

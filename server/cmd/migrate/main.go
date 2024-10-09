@@ -13,7 +13,7 @@ import (
 
 func main() {
 	config := config.NewConfig()
-	db := database.NewDB(database.NewMySQLConfig(config))
+	db := database.NewDB(config)
 
 	driver, err := mysql.WithInstance(db.DB, &mysql.Config{})
 	if err != nil {
