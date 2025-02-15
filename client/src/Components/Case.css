@@ -1,0 +1,22 @@
+.case {
+    list-style: none;
+    display: flex;
+}
+
+.case p {
+    background: var(--grey);
+    padding: 0.4rem;
+}
+
+.match-text {
+    text-align: center;
+    width: 3rem;
+}
+
+.case span {
+    padding: 0.5rem;
+}
+
+.literal {
+    flex-grow: 1;
+}

@@ -1,0 +1,5 @@
+.output {
+    margin-top: 2rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
