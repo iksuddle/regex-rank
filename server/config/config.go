@@ -12,16 +12,18 @@ type Config struct {
 	DBUser       string
 	DBPassword   string
 	DBName       string
+	SessionKey   string
 }
 
-func NewConfig() *Config {
-	return &Config{
+func NewConfig() Config {
+	return Config{
 		ClientId:     getEnv("CLIENT_ID"),
 		ClientSecret: getEnv("CLIENT_SECRET"),
 		Port:         getEnv("PORT"),
 		DBUser:       getEnv("DB_USER"),
 		DBPassword:   getEnv("DB_PASSWORD"),
 		DBName:       getEnv("DB_NAME"),
+		SessionKey:   getEnv("SESSION_KEY"),
 	}
 }
 

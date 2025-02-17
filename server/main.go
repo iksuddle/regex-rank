@@ -13,9 +13,8 @@ func main() {
 
 	config := config.NewConfig()
 
-    db := database.NewDB(config)
+	db := database.NewDB(config)
 	auth.InitAuth(config, db)
-
 
 	e := echo.New()
 

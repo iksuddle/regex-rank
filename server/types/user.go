@@ -15,8 +15,8 @@ type User struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
-func NewUser(data *UserData) *User {
-	return &User{
+func NewUser(data UserData) User {
+	return User{
 		Id:        data.Id,
 		Username:  data.Username,
 		AvatarUrl: data.AvatarUrl,

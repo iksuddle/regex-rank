@@ -8,7 +8,7 @@ import (
 	"suddle.dev/regex-rank/config"
 )
 
-func NewDB(config *config.Config) *sqlx.DB {
+func NewDB(config config.Config) *sqlx.DB {
 	mySqlConfig := newMySQLConfig(config)
 
 	db, err := sqlx.Connect("mysql", mySqlConfig.FormatDSN())
@@ -20,7 +20,7 @@ func NewDB(config *config.Config) *sqlx.DB {
 	return db
 }
 
-func newMySQLConfig(config *config.Config) *mysql.Config {
+func newMySQLConfig(config config.Config) *mysql.Config {
 	mySQLConfig := mysql.NewConfig()
 
 	mySQLConfig.User = config.DBUser
