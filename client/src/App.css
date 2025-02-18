@@ -7,6 +7,32 @@
 
 .title {
     text-align: center;
-    font-weight: 400;
+    font-weight: 700;
+}
+
+.subtitle {
+    text-align: center;
+}
+
+.nav {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.icon {
+    color: #a0a0a0;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.icon:hover {
     color: var(--dark-grey);
+}
+
+.outlet {
+    min-height: 19rem;
+    margin-top: 2rem;
 }

@@ -5,7 +5,11 @@
 
 .case p {
     background: var(--grey);
-    padding: 0.4rem;
+    padding: 0.6rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    transition: var(--transition);
 }
 
 .match-text {
@@ -13,8 +17,13 @@
     width: 3rem;
 }
 
+.literal {
+    font-family: var(--font-mono);
+}
+
 .case span {
     padding: 0.5rem;
+    transition: var(--transition);
 }
 
 .literal {

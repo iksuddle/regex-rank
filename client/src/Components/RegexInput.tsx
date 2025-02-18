@@ -17,12 +17,13 @@ export default function RegexInput() {
     console.log(userInput);
 
     return (
-        <div style={{ marginTop: "4rem" }}>
+        <div>
             <div className="error-message">{errorMessage}</div>
             <div className="input">
                 <input onChange={(e) => { setUserInput(e.target.value); }}
                     value={userInput}
-                    placeholder="enter regex here...">
+                    placeholder="enter regex here..."
+                    autoComplete="off">
                 </input>
                 <button disabled={!done} style={flexCenter}><MdArrowForwardIos size={18} /></button>
             </div>

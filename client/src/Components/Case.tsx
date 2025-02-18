@@ -1,13 +1,13 @@
 import "./Case.css";
 
 export default function Case({ literal, match, done }: any) {
-    let matchColor = "#a4cf9b";
-    let ignoreColor = "#e8a7a7";
+    let matchColor = "#b8e0af";
+    let ignoreColor = "#ebb7b7";
     let literalColor = "#707070";
 
     if (done) {
         matchColor = "#65ad55";
-        ignoreColor = "#e66c6c";
+        ignoreColor = "#e34d4d";
         literalColor = "#0a0a0a";
     }
 

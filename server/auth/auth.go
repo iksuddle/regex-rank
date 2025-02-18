@@ -74,7 +74,7 @@ func LoginCallbackHandler(c echo.Context) error {
 	authCode := c.FormValue("code")
 	token, err := authConfig.Exchange(context.TODO(), authCode)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, "problem exchanging token")
 	}
 
 	// creates http client with the token
@@ -83,19 +83,19 @@ func LoginCallbackHandler(c echo.Context) error {
 	// get info from github using token
 	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	defer res.Body.Close()
 
 	// decode user data
 	userData := types.UserData{}
 	if err := json.NewDecoder(res.Body).Decode(&userData); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// check if user exists and create them if needed
@@ -104,7 +104,7 @@ func LoginCallbackHandler(c echo.Context) error {
 		user = types.NewUser(userData)
 		err = userStore.CreateUser(user)
 		if err != nil {
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
