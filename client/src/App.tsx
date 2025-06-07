@@ -2,6 +2,7 @@ import { Link, Outlet } from "react-router";
 import "./App.css";
 import { FaHouse, FaUser } from "react-icons/fa6";
 
+
 function App() {
     return (
         <>
