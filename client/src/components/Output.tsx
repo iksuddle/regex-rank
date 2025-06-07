@@ -1,7 +1,13 @@
 import Case from "./Case";
 import "./Output.css";
 
-export default function Output({ userInput, setErrorMessage, setDone }: any) {
+type OutputProps = {
+    userInput: string;
+    setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+    setDone: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function Output({ userInput, setErrorMessage, setDone }: OutputProps) {
     const casesData = [
         { literal: "hello", match: true },
         { literal: "world", match: true },

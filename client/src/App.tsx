@@ -1,10 +1,13 @@
 import { Link, Outlet } from "react-router";
-import "./App.css";
 import { FaHouse, FaUser } from "react-icons/fa6";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { User } from "./types/types";
+import "./App.css";
 
 
 function App() {
+    let [user, setUser] = useState<User | undefined>(undefined);
+
     // authenticate
     useEffect(() => {
         const fetch_user = async () => {
@@ -18,7 +21,7 @@ function App() {
                 }
 
                 const user_json = await response.json();
-                console.log(user_json);
+                setUser(user_json);
             } catch (error) {
                 console.log(error);
             }
@@ -32,7 +35,7 @@ function App() {
             <h1 className="title">REGEX RANK</h1>
             <p className="subtitle">daily regex problems</p>
             <div className="outlet">
-                <Outlet />
+                <Outlet context={{ user }} />
             </div>
             <div className="nav">
                 <Link className="icon" to={"/"}>

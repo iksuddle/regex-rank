@@ -4,8 +4,8 @@ import './index.css'
 import App from './App.tsx'
 import { BrowserRouter, Routes } from 'react-router'
 import { Route } from 'react-router'
-import RegexInput from './Components/RegexInput.tsx'
-import Login from './Components/Login.tsx'
+import RegexInput from './components/RegexInput.tsx'
+import Dashboard from './components/Dashboard.tsx'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -13,7 +13,7 @@ createRoot(document.getElementById('root')!).render(
             <Routes>
                 <Route path="/" element={<App />} >
                     <Route index element={<RegexInput />} />
-                    <Route path="/login" element={<Login />}/>
+                    <Route path="/login" element={<Dashboard />}/>
                 </Route>
             </Routes>
         </BrowserRouter>

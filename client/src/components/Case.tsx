@@ -1,6 +1,12 @@
 import "./Case.css";
 
-export default function Case({ literal, match, done }: any) {
+type CaseProps = {
+    literal: string;
+    match: boolean;
+    done: boolean;
+}
+
+export default function Case({ literal, match, done }: CaseProps) {
     let matchColor = "#b8e0af";
     let ignoreColor = "#ebb7b7";
     let literalColor = "#707070";
