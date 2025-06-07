@@ -14,12 +14,13 @@ func main() {
 	config := config.NewConfig()
 
 	db := database.NewDB(config)
-	auth.InitAuth(config, db)
+	auth := auth.InitAuth(config, db)
 
 	e := echo.New()
 
 	e.GET("/login", auth.LoginHandler)
 	e.GET("/login/callback", auth.LoginCallbackHandler)
+	e.GET("/me", auth.GetCurrentUser)
 
 	e.Start(":" + config.Port)
 }

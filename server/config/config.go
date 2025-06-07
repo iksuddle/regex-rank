@@ -13,6 +13,7 @@ type Config struct {
 	DBPassword   string
 	DBName       string
 	SessionKey   string
+	ClientUrl    string
 }
 
 func NewConfig() Config {
@@ -24,6 +25,7 @@ func NewConfig() Config {
 		DBPassword:   getEnv("DB_PASSWORD"),
 		DBName:       getEnv("DB_NAME"),
 		SessionKey:   getEnv("SESSION_KEY"),
+		ClientUrl:    getEnv("CLIENT_URL"),
 	}
 }
 

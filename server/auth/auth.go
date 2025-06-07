@@ -17,14 +17,20 @@ import (
 	"suddle.dev/regex-rank/types"
 )
 
+type Auth struct {
+	authConfig   *oauth2.Config
+	userStore    database.UserStore
+	sessionStore *sessions.CookieStore
+	redirectURL  string
+}
+
 const stateSessionName = "rgx-state"
+const authSessionName = "auth-session"
 
-var authConfig *oauth2.Config
-var userStore database.UserStore
-var sessionStore *sessions.CookieStore
+func InitAuth(c config.Config, db *sqlx.DB) Auth {
+	auth := Auth{}
 
-func InitAuth(c config.Config, db *sqlx.DB) {
-	authConfig = &oauth2.Config{
+	auth.authConfig = &oauth2.Config{
 		ClientID:     c.ClientId,
 		ClientSecret: c.ClientSecret,
 		RedirectURL:  "http://localhost:" + c.Port + "/login/callback",
@@ -32,21 +38,25 @@ func InitAuth(c config.Config, db *sqlx.DB) {
 		Scopes:       []string{"read:user"},
 	}
 
-	userStore = database.UserStore{
+	auth.userStore = database.UserStore{
 		Db: db,
 	}
 
-	sessionStore = sessions.NewCookieStore([]byte(c.SessionKey))
-	sessionStore.Options.Path = "/"
-	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.SameSite = http.SameSiteLaxMode
-	sessionStore.Options.Secure = true // some browsers consider localhost secure
+	auth.sessionStore = sessions.NewCookieStore([]byte(c.SessionKey))
+	auth.sessionStore.Options.Path = "/"
+	auth.sessionStore.Options.HttpOnly = true
+	auth.sessionStore.Options.SameSite = http.SameSiteLaxMode
+	auth.sessionStore.Options.Secure = true // some browsers consider localhost secure
+
+	auth.redirectURL = c.ClientUrl + "login"
+
+	return auth
 }
 
-func LoginHandler(c echo.Context) error {
-	s, err := sessionStore.Get(c.Request(), stateSessionName)
+func (auth Auth) LoginHandler(c echo.Context) error {
+	s, err := auth.sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not decode session")
+		return httpError(err)
 	}
 
 	stateToken := generateStateToken()
@@ -54,65 +64,119 @@ func LoginHandler(c echo.Context) error {
 
 	s.Save(c.Request(), c.Response().Writer)
 
-	url := authConfig.AuthCodeURL(stateToken)
+	url := auth.authConfig.AuthCodeURL(stateToken)
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func LoginCallbackHandler(c echo.Context) error {
-	s, err := sessionStore.Get(c.Request(), stateSessionName)
+func (auth Auth) LoginCallbackHandler(c echo.Context) error {
+	s, err := auth.sessionStore.Get(c.Request(), stateSessionName)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "could not decode session")
+		return httpError(err)
 	}
 
 	// verify state token
 	stateToken := c.FormValue("state")
 	if stateToken != s.Values["state"] {
-		return echo.NewHTTPError(http.StatusForbidden, "state token mismatch")
+		return httpError(err)
 	}
 
 	// exchange code for token
 	authCode := c.FormValue("code")
-	token, err := authConfig.Exchange(context.TODO(), authCode)
+	token, err := auth.authConfig.Exchange(context.TODO(), authCode)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "problem exchanging token")
+		return httpError(err)
 	}
 
 	// creates http client with the token
-	client := authConfig.Client(context.TODO(), token)
+	client := auth.authConfig.Client(context.TODO(), token)
 
 	// get info from github using token
 	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httpError(err)
 	}
 
 	res, err := client.Do(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httpError(err)
 	}
 	defer res.Body.Close()
 
 	// decode user data
 	userData := types.UserData{}
 	if err := json.NewDecoder(res.Body).Decode(&userData); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httpError(err)
 	}
 
 	// check if user exists and create them if needed
-	user, err := userStore.GetUserById(userData.Id)
+	user, err := auth.userStore.GetUserById(userData.Id)
 	if err != nil {
 		user = types.NewUser(userData)
-		err = userStore.CreateUser(user)
+		err = auth.userStore.CreateUser(user)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httpError(err)
 		}
 	}
 
+	// store user in session
+	authSession, err := auth.sessionStore.Get(c.Request(), authSessionName)
+	if err != nil {
+		return httpError(err)
+	}
+
+	authSession.Values["user_id"] = user.Id
+	authSession.Values["user_name"] = user.Username
+	authSession.Values["avatar_url"] = user.AvatarUrl
+
+	err = authSession.Save(c.Request(), c.Response().Writer)
+	if err != nil {
+		return httpError(err)
+	}
+
+	return c.Redirect(http.StatusPermanentRedirect, auth.redirectURL)
+}
+
+func (auth Auth) GetCurrentUser(c echo.Context) error {
+	authSession, err := auth.sessionStore.Get(c.Request(), authSessionName)
+	if err != nil {
+		return httpError(err)
+	}
+
+	if authSession.IsNew {
+		return c.JSON(http.StatusUnauthorized, struct{ msg string }{msg: "session not found"})
+	}
+
+	// construct user
+	// no need to check errors since we know user is stored in the session
+	user := types.UserData{
+		Id:        getIntFromSession(authSession, "user_id"),
+		Username:  getStringFromSession(authSession, "user_name"),
+		AvatarUrl: getStringFromSession(authSession, "avatar_url"),
+	}
+
 	return c.JSON(http.StatusOK, user)
+}
+
+func getStringFromSession(session *sessions.Session, key string) string {
+	if val, ok := session.Values[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
+func getIntFromSession(session *sessions.Session, key string) int64 {
+	if val, ok := session.Values[key].(int64); ok {
+		return val
+	}
+	return -1
 }
 
 func generateStateToken() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
+}
+
+func httpError(err error) error {
+	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 }
