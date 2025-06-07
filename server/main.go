@@ -31,6 +31,7 @@ func main() {
 	e.GET("/login", auth.LoginHandler)
 	e.GET("/login/callback", auth.LoginCallbackHandler)
 	e.GET("/me", auth.GetCurrentUser)
+	e.GET("/logout", auth.LogoutHandler)
 
 	e.Start(":" + config.Port)
 }

@@ -24,6 +24,7 @@ function App() {
                 setUser(user_json);
             } catch (error) {
                 console.log(error);
+                setUser(undefined);
             }
         }
 

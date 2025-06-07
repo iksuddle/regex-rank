@@ -161,6 +161,23 @@ func (auth Auth) GetCurrentUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+func (auth Auth) LogoutHandler(c echo.Context) error {
+	authSession, err := auth.sessionStore.Get(c.Request(), authSessionName)
+	if err != nil {
+		return httpError(err)
+	}
+
+	// deletes the session
+	authSession.Options.MaxAge = -1
+
+	err = authSession.Save(c.Request(), c.Response().Writer)
+	if err != nil {
+		return httpError(err)
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, auth.redirectURL)
+}
+
 func getStringFromSession(session *sessions.Session, key string) string {
 	if val, ok := session.Values[key].(string); ok {
 		return val
