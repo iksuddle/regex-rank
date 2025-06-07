@@ -17,6 +17,10 @@ import (
 	"suddle.dev/regex-rank/types"
 )
 
+type MsgResponse struct {
+	Msg string `json:"msg"`
+}
+
 type Auth struct {
 	authConfig   *oauth2.Config
 	userStore    database.UserStore
@@ -143,7 +147,7 @@ func (auth Auth) GetCurrentUser(c echo.Context) error {
 	}
 
 	if authSession.IsNew {
-		return c.JSON(http.StatusUnauthorized, struct{ msg string }{msg: "session not found"})
+		return c.JSON(http.StatusUnauthorized, MsgResponse{Msg: "session not found"})
 	}
 
 	// construct user
