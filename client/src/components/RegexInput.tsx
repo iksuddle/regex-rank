@@ -14,8 +14,6 @@ export default function RegexInput() {
         justifyContent: "center"
     }
 
-    console.log(userInput);
-
     return (
         <div>
             <div className="error-message">{errorMessage}</div>

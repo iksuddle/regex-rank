@@ -1,17 +1,5 @@
-.login {
-    display: flex;
-    flex-direction: column;
-    height: 80%;
-}
-
-.login-btn {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-btn button {
+button {
+    display: block;
     background: var(--black);
     color: var(--light-grey);
     font-size: 1rem;
@@ -20,9 +8,10 @@
     border: none;
     border-radius: 0.5rem;
     transition: var(--transition);
+    box-sizing: border-box;
 }
 
-.login-btn button:hover {
+button:hover {
     cursor: pointer;
     background: #505050;
 }
