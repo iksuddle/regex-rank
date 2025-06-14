@@ -19,9 +19,9 @@ input {
 }
 
 button {
-    display: flex;               /* New: allows centering */
-    align-items: center;         /* Vertical center */
-    justify-content: center;   
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     font-family: monospace;
     font-size: 1.2rem;

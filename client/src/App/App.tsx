@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router";
-import "./App.css";
 import { FaHouse, FaUser } from "react-icons/fa6";
+import "./App.css";
 
 export default function App() {
   return <>
@@ -10,8 +10,8 @@ export default function App() {
       <Outlet />
     </div>
     <nav className="center">
-      <Link to="/"><FaHouse className="icon"/></Link>
-      <Link to="/profile"><FaUser className="icon"/></Link>
+      <Link to="/"><FaHouse className="icon" /></Link>
+      <Link to="/profile"><FaUser className="icon" /></Link>
     </nav>
   </>;
 }
