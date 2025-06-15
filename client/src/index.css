@@ -13,10 +13,11 @@
 
   --bg-color: #202020;
   --black-dark: #1a1a1a;
-  --black: #252525;
+  --black: #2b2b2b;
   --black-light: #303030;
   --grey: #a0a0a0;
   --text-color: #d0d0d0;
+  --transition: all 150ms ease-in-out;
 }
 
 * {

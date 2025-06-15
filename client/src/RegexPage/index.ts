@@ -1,1 +1,1 @@
-export { default } from "./Regex";
+export { default } from "./RegexPage";

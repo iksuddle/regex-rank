@@ -1,0 +1,28 @@
+.case {
+    display: flex;
+    background: var(--black);
+    height: 2.5rem;
+}
+
+.case p {
+    padding: 0.2rem;
+    align-content: center;
+    font-size: 1.1rem;
+}
+
+.status {
+    width: 4rem;
+    margin-left: 0.5rem;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.literal {
+    flex-grow: 1;
+    font-family: var(--font-mono);
+}
+
+.case span {
+    width: 1rem;
+    transition: var(--transition);
+}
