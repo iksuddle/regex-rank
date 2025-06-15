@@ -7,14 +7,14 @@ import RegexPage from "./RegexPage";
 import Profile from "./Profile";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<RegexPage />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </StrictMode>,
+    <StrictMode>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<App />}>
+                    <Route index element={<RegexPage />} />
+                    <Route path="/profile" element={<Profile />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    </StrictMode>,
 );
