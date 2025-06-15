@@ -2,7 +2,7 @@ import { FaAngleRight } from "react-icons/fa6";
 
 import "./RegexInput.css";
 
-type RegexInputProps = {
+interface RegexInputProps {
     userInput: string;
     setUserInput: React.Dispatch<React.SetStateAction<string>>;
     done: boolean;

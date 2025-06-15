@@ -1,6 +1,6 @@
 import "./Case.css";
 
-type CaseProps = {
+interface CaseProps {
     literal: string;
     match: boolean;
     done: boolean;

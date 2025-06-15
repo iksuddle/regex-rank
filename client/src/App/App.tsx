@@ -5,7 +5,7 @@ import "./App.css";
 export default function App() {
     return <>
         <h1 className="center">REGEX RANK</h1>
-        {/* <p className="center">daily regex problems</p> */}
+        <p className="center">daily regex problems</p>
         <div className="content">
             <Outlet />
         </div>
