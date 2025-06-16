@@ -52,7 +52,7 @@ func InitAuth(c config.Config, db *sqlx.DB) Auth {
 	auth.sessionStore.Options.SameSite = http.SameSiteLaxMode
 	auth.sessionStore.Options.Secure = true // some browsers consider localhost secure
 
-	auth.redirectURL = c.ClientUrl + "login"
+	auth.redirectURL = c.ClientUrl + "profile"
 
 	return auth
 }
