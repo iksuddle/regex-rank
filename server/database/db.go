@@ -9,18 +9,6 @@ import (
 )
 
 func NewDB(config config.Config) *sqlx.DB {
-	mySqlConfig := newMySQLConfig(config)
-
-	db, err := sqlx.Connect("mysql", mySqlConfig.FormatDSN())
-	if err != nil {
-		log.Fatal("error connecting to db:", err)
-	}
-
-	log.Println("successfully connected to db")
-	return db
-}
-
-func newMySQLConfig(config config.Config) *mysql.Config {
 	mySQLConfig := mysql.NewConfig()
 
 	mySQLConfig.User = config.DBUser
@@ -28,5 +16,10 @@ func newMySQLConfig(config config.Config) *mysql.Config {
 	mySQLConfig.DBName = config.DBName
 	mySQLConfig.ParseTime = true
 
-	return mySQLConfig
+	db, err := sqlx.Connect("mysql", mySQLConfig.FormatDSN())
+	if err != nil {
+		log.Fatal("error connecting to db:", err)
+	}
+
+	return db
 }

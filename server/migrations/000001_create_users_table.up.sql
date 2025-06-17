@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INT(11) NOT NULL PRIMARY KEY,
+    username VARCHAR(40) NOT NULL,
+    avatar_url VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL
+);
