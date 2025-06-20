@@ -1,10 +1,6 @@
 package database
 
 import (
-	"database/sql"
-	"errors"
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"suddle.dev/regex-rank/types"
 )
@@ -20,7 +16,6 @@ func (s *UserStore) CreateUser(user types.User) error {
 		return err
 	}
 
-	log.Printf("created new user `%s` with id %d\n", user.Username, user.Id)
 	return nil
 }
 
@@ -29,9 +24,6 @@ func (s *UserStore) GetUserById(id int64) (types.User, error) {
 	user := types.User{}
 	err := s.Db.Get(&user, "SELECT * FROM users WHERE id=?", id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			log.Printf("user %d not found\n", id)
-		}
 		return user, err
 	}
 
