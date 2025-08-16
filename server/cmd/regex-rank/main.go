@@ -13,7 +13,6 @@ import (
 
 func main() {
 	godotenv.Load()
-
 	config := config.NewConfig()
 
 	db := database.NewDB(config)
